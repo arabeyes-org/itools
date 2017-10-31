@@ -39,7 +39,7 @@ Basic Instructions:
 
 + Download the install the ITL-tools (ie. itools package)
   - Compile the package
-    $ autogen.sh
+    $ autoreconf -f -i
     $ configure
     $ make
   - To install post a succesful compilation,
