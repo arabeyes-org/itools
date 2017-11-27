@@ -589,7 +589,7 @@ int main(int argc, char *argv[])
                           "April", "May", "June", "July", "August",
                           "September", "October", "November", "December" };
    const char
-      *method_name[9] = { "NONE",
+      *method_name[12] = { "NONE",
                           "Egyptian General Authority of Survey",
                           "University of Islamic Sciences, Karachi (Shaf'i)",
                           "University of Islamic Sciences, Karachi (Hanafi)",
@@ -597,7 +597,10 @@ int main(int argc, char *argv[])
                           "Muslim World League (MWL)",
                           "Umm Al-Qurra University",
                           "Fixed Isha Angle Interval (always 90)",
-                          "Egyptian General Authority of Survey (Egypt)"};
+                          "Egyptian General Authority of Survey (Egypt)",
+                          "Umm Al-Qurra Ramadan, Saudi Arabia",
+                          "Moonsighting Committee Worldwide",
+                          "Morocco Awqaf, Morocco"};
 
    int i;
    int cal_num;
