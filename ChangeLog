@@ -1,0 +1,442 @@
+2004-12-28 [- Version 0.6.1 is released -]
+
+2004-12-28 13:24  nadim
+
+	* doc/ical.1:
+
+	+ Minor spelling correction
+
+2004-12-27 08:20  thamer
+
+	* debian/changelog, debian/compat, debian/control,
+	  debian/copyright, debian/dirs, debian/docs, debian/rules,
+	  Makefile.in, configure.in:
+
+	* ipreminder included in the package/make install (still no manpage)
+	* Added the debian build system
+	* AFAIC, This code is now ready for itools 0.6.1 release
+
+2004-12-25 11:49  thamer
+
+	* configure.in:
+
+	* removing the gcc -m32 flag from both the lib and itools
+
+2004-12-16 10:38  thamer
+
+	* doc/ical.1, doc/idate.1, doc/ipraytime.1, configure.in:
+
+	* we need the environment CFLAGS
+	* updated the Bug reporting section...
+	* removed referances to libitl man-page
+
+2004-12-14 05:37  thamer
+
+	* doc/ipraytime.1:
+
+	* Fixed methods inconsistencies with the library
+	* Commented out references to libitl man-page for now...
+
+2004-10-23 03:30  thamer
+
+	* doc/ipraytime.1:
+
+	* added a missing rounding method
+
+2004-10-23 02:55  thamer
+
+	* Makefile.in:
+
+	* To static link the tools with the lib for now use:
+	  ./configure LDFLAGS='-L../../libs/build/static/' && make static
+
+2004-08-19 [- Version 0.6.0 is released -]
+
+2004-08-18 15:09  nadim
+
+	* ireminder.pl:
+
+	+ Minor code cleanup
+	+ Added time-indicator on all reminders
+
+2004-08-13 09:29  thamer
+
+	* ipraytime.c, doc/ipraytime.1:
+
+	* Adding support for setting temperature and pressure in ipraytime.
+
+2004-07-28 16:11  nadim
+
+	* README, configure.in, ireminder.pl:
+
+	+ ireminder got a new '-inplace' option (to print in same spot)
+	+ configure now doesn't result in needing LD_LIBRARY_PATH (thanks M.Sameer)
+	+ readme now includes a bit more verbosity on compile process
+
+2004-07-26 17:14  nadim
+
+	* ireminder.pl:
+
+	+ Corrected a comment regarding -reminder (its minutes not seconds)
+
+2004-07-26 16:55  nadim
+
+	* ireminder.pl:
+
+	+ Initial Release
+	+ Fully functional, sound and other minor features to be added later
+
+2004-07-18 03:11  thamer
+
+	* AUTHORS:
+
+
+	* moved "ipraytime related" from library's AUTHORS
+
+2004-07-16 18:26  nadim
+
+	* Makefile, Makefile.in, autogen.sh, config.h.in, configure.in,
+	  ipraytime.c:
+
+	+ Added autotools
+
+2004-07-15 17:56  nadim
+
+	* Makefile:
+
+	+ Added uninstall option
+
+2004-07-15 17:39  nadim
+
+	* AUTHORS, COPYING, Makefile, README, ical.c, idate.c, ipraytime.c:
+
+	+ The user applications have been extracted from 'ITL-lib' proper
+	+ 'ITL-tools' or 'ITL-apps' as a package can now be created
+
+2004-07-10 08:43  thamer
+
+	* ipraytime.c:
+
+	+ Reduced calls to the number crunching code.
+	+ DMS seconds now implemented as type double.
+	+ Fixed the implementaion of the HALF methods.
+	+ Fixed Imsaak not working when Fajr time is invalid.
+
+2004-06-30 15:52  thamer
+
+	* ipraytime.c:
+
+
+	* Adding a more accurate (but verbose) back-end algorithm.
+	* Removed the old code for now...I will probably re add it later as an
+	  option.
+	* Switched to julian dates instead of day of year.
+	* We now return 99:99 instead of the 00:00 for invalid times.
+	* NEXTFAJR is now rounded up.
+	* Fixed order of extreme methods variables and a couple more bugs with
+	  the extreme code.
+	* Fixed a bad offset array size and switched to 'double' to allow
+	  less than 1 minute offsets.
+
+2004-05-26 02:52  thamer
+
+	* doc/ipraytime.1:
+
+	* Updated to include all of the new options and arguments.
+
+2004-05-26 02:47  thamer
+
+	* ipraytime.c:
+
+
+	* tm_gmtoff is seconds east of UTC so we shouldn't reverse the sign.
+	* Use "-h12" for showing the prayer times in regular time display format.
+	* Added ability to set "Method.round" using "-r".
+	* Some options in the configuration file now use their full name form.
+
+2004-05-07 17:05  thamer
+
+	* ipraytime.c:
+
+	* Fixed arguments not being handled correctly.
+	* Added the "-sea" argument for setting the sea-level from the command line.
+	* Added the ability to specify a DST range, for example:
+
+		ipraytime  --dst-start 20040328  --dst-end 20041029
+
+2004-04-28 02:46  thamer
+
+	* ipraytime.c:
+
+	* app: fixed angle not being set correctly after yesterdays update (oops).
+	* app: changed "-ex" to "-x" for setting the extreme methods.
+	* app: Added Daylight Saving Time support
+	* app: added "--dst" or "-s" argument. the dst argument can have three variables:
+		"--dst 0" means no daylight saving time.
+		"--dst 1" always add one hour to the computed prayer times.
+	  	"--dst 2" auto adjust for daylight saving time based on timezone. (default)
+
+2004-04-27 05:56  thamer
+
+	* ipraytime.c:
+
+	* lib: replaced deg2Rad function with macros
+	* lib: Rewrote most of the extreme method section + new methods and a
+	  new default
+	* lib: Changed the invalid trigger from -1 to -0.9 to reduce inaccurate
+	  gaps between valid and invalid prayer times.
+	* lib: Added more defines for clarity
+	* app: Added an "--extreme" or "-ex" option to set the extreme method
+	  from the command line.
+	* app: you can now define EXTREME_DEBUG to mark the output prayer times
+	  with '*' based on the isExtreme flag of each prayer time.
+  
+2004-03-30 [- Version 0.5 is released -]
+
+2004-03-19 10:04  bahra
+
+	* ipraytime.c:
+
+	Use global config.h
+
+2004-02-23 16:48  nadim
+
+	* ipraytime.c:
+
+	+ Corrected previous fix to include Solaris functionality
+
+2004-02-14 11:24  bahra
+
+	* ipraytime.c:
+
+	long timezone is part of the XSI (System V) standard. BSD
+	claimed timezone long before XSI as a function (that returns
+	TZ prefix). In order to maintain compatibility towards various
+	open systems (especially ones that are not looking for SysV
+	compatibility [All BSDs, Darwin) switch to using the standard
+	tm_gmtoff element available in the tm structure
+	(*POSIX compliancy*)
+
+2004-02-06 17:09  nadim
+
+	* doc/: ical.1, idate.1:
+
+	+ Added/modified info regarding pre-hijrah (pre-epoch) support
+
+2004-02-06 16:34  nadim
+
+	* ical.c, idate.c:
+
+	+ Added pre-hijrah date conversion abilities
+	+ Added B.H/A.H as well as B.C/A.D indicators
+	+ All dates are now allowed to convert from/to (including negative years)
+	+ 'ical' display bug fixed when selected day is last entry in week
+
+2004-01-26 22:51  thamer
+
+	* ipraytime.c, doc/ipraytime.1:
+
+	A small update:
+
+	* changed GetQibla to GetNorthQibla.
+	* GetNorthQibla now takes a Location structure as it's only argument.
+	* app: changed isExtreme to extreme and corrected the man page
+	  (This was changed in the library some time ago. "isExtreme" is now only the
+	  indicator switch and "extreme" is the method selector)
+	* now using the appropriate degree char.
+	* app: changed Qibla outoput from "North" to "true North"
+	* lib & demo: some style changes (indention)
+
+2004-01-23 16:31  nadim
+
+	* ical.c, doc/ical.1, doc/idate.1:
+
+	+ Added 'fixed_view' option to default to using Calendar's week view
+	+ Added background to both manpages
+
+2004-01-09 15:22  nadim
+
+	* ical.c:
+
+	+ Corrected 'dual' month header based on FROM conversation type
+
+2004-01-09 10:14  nadim
+
+	* doc/ical.1, ical.c, idate.c:
+
+	+ Added 'ical' application and manpage
+	+ Added a couple of new struct members (to ease ical implementation)
+	+ No Umm Al-Qura support yet
+
+2004-01-02 23:26  nadim
+
+	* ipraytime.c, doc/ipraytime.1:
+
+	+ Initial release of 'man' page
+	+ Added manpage and user application to install/uninstall process
+
+2004-01-02 14:27  nadim
+
+	* doc/idate.1:
+
+	+ Added a simplistic 'man' page
+	+ Included it installation within the makefiles
+	+ Removed demo from compile 'all'
+
+2003-12-31 17:53  thamer
+
+	* ipraytime.c:
+
+	* changed MAKKAH_LONG..etc to a more accurate KAABA_LONG..etc
+
+	* the app now uses UTC/GMT time for Makkah (+3) instead of (+2) as
+	  default.
+
+2003-12-31 14:04  nadim
+
+	* idate.c:
+
+	+ Modified umm_alqura to use hijri.h's structures
+	+ Various minor fixes/changes
+	+ Included umm_alqura within 'idate' (--umm_alqura option)
+	+ Added input range checking on 'idate'
+	+ Removed library exit in lieu or error codes
+	+ Modified API to return error code (pass in/out reference)
+
+2003-12-30 17:03  nadim
+
+	* idate.c:
+
+	+ Initial release of 'idate' (no umm_alqura option yet -- coming soon)
+	+ Minor modifications/clean-up for readability
+
+2003-12-29 16:14  nadim
+
+	* ipraytime.c:
+
+	+ Oops, corrected default Angle_method to point to Umm Alqura
+
+2003-12-29 15:54  nadim
+
+	* ipraytime.c:
+
+	+ Minor cleanups
+	+ Added single line header tag (at a min)
+	+ Corrected newly agreed upon spellings
+	+ Renamed user application to 'ipraytime' in CVS
+	+ Corrected Qibla call in ipraytime
+
+2003-12-27 02:11  thamer
+
+	* ipraytime.c:
+
+	* removed a debug printf and added a type cast
+
+2003-12-26 16:39  bahra
+
+	* ipraytime.c:
+
+	- Add a config.h.in for better cooperation with autoconf
+	- Change prayertime.c to deal with the possibly
+	  of a sys/time.h by incorporating config.h
+	- Add Makefile.in for source-code building
+
+2003-12-25 14:47  thamer
+
+	* ipraytime.c:
+
+	* Removed direction charachter appearing at 0`0'0" from default qibla.
+	* the app now uses getMethod library function through "-method"...
+	* ...using om-alqura as the default method for Makka times.
+
+2003-12-24 16:33  thamer
+
+	* ipraytime.c:
+
+	* Added a getQibla function and output for the app and demo.
+	* Fixed direction display issues with long/lat when degree=0
+
+2003-12-23 05:38  thamer
+
+	* ipraytime.c:
+
+
+	* offsets are now implemented for every salat.
+	* "Prayer ptList" must now be initialaized.
+	* getImsaak, getNextDayImsaak, getNextDayFajr pass structures by
+	  refrence.
+	* re-Added Imsaak and next Fajr to "prayertime.c".
+
+2003-12-16 17:02  thamer
+
+	* ipraytime.c:
+
+	fixed for new library interface
+
+2003-12-15 05:01  thamer
+
+	* ipraytime.c:
+
+	adding a new version of the prayer library
+
+2003-12-15 04:57  thamer
+
+	* ipraytime.c:
+
+	Moving old engine files to prayer-old
+
+2003-12-11 16:13  nadim
+
+	* ipraytime.c:
+
+	+ Added -brief option
+	+ All settable variables are recognized in ~/.prayerc file (or --file) now
+	+ Corrected DST's type in prayerengine from double to int
+
+2003-12-10 13:12  nadim
+
+	* ipraytime.c:
+
+	+ Oops, forgot to print the nice header in single-mode
+
+2003-12-10 12:43  nadim
+
+	* ipraytime.c:
+
+	+ Added -year option (we now have all that hdate's praytime offers)
+	+ A couple of minor typo/bug fixes
+	+ Cleaned-up various -Wall warnings on linux
+
+2003-12-09 22:21  nadim
+
+	* ipraytime.c:
+
+	+ Removed those pesky ^M from files (via emacs and 'dos2unix')
+	+ ATTENTION - please people do NOT use DOS or winblows to develop
+
+2003-12-09 17:33  nadim
+
+	* ipraytime.c:
+
+	+ New library filenames required an update to all
+	+ Made a modification to the library itself
+	  - Pass references not entire structs (more efficient)
+	+ Lots of new additions to 'prayertime'
+	  - Reads ~/.prayerc
+	  - Reads environ variable PT_DATA
+	  - Added -file option (in case RC-file is in different place)
+	  - Added -end option
+	  - Added numerical month option (via -month)
+	  - Proper accounting of days per month + leap.year
+	  - Updated todo within file
+
+2003-12-05 18:24  nadim
+
+	* ipraytime.c:
+
+	+ Add-ons to Thamer's prayert (had 45 minutes to spare :-)
+	+ I didn't have Thamer's OK to hack prayert so created new file
+	+ Added --date, --latitude, --longitude, --utcdiff, --month
+	+ Minimal --help' added
+	+ Added TODOs within the file
+
