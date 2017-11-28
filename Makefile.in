@@ -1,4 +1,4 @@
-# $Id: Makefile.in 2192 2009-03-12 00:27:22Z thamer $
+# $Id: Makefile.in 11578 2010-05-06 13:46:01Z thamer $
 
 PREFIX		= @prefix@
 
@@ -80,7 +80,7 @@ dist: distclean
 	rm -rf /tmp/$(TARNAME)-$(VERSION)/
 	mkdir /tmp/$(TARNAME)-$(VERSION)/
 	cp -Pa ./ /tmp/$(TARNAME)-$(VERSION)/
-	tar --exclude '.svn' -C /tmp/ -cvhzf ./$(TARNAME)-$(VERSION).tar.gz $(TARNAME)-$(VERSION)/
+	tar --exclude-vcs --exclude 'debian' -C /tmp/ -cvhzf ./$(TARNAME)-$(VERSION).tar.gz $(TARNAME)-$(VERSION)/
 	rm -rf /tmp/$(TARNAME)-$(VERSION)/
 
 clean:

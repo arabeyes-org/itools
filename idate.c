@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: idate.c 2181 2009-03-09 04:17:36Z thamer $
+ * $Id: idate.c 10994 2009-03-09 04:17:36Z thamer $
  *
  * ------------
  * Description:
@@ -21,9 +21,9 @@
  * -----------------
  * Revision Details:    (Updated by Revision Control System)
  * -----------------
- *  $Date: 2009-03-09 07:17:36 +0300 (Mon, 09 Mar 2009) $
+ *  $Date: 2009-03-09 05:17:36 +0100 (Mon, 09 Mar 2009) $
  *  $Author: thamer $
- *  $Revision: 2181 $
+ *  $Revision: 10994 $
  *  $Source$
  *
  * (www.arabeyes.org - under GPL license)

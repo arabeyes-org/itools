@@ -1,4 +1,4 @@
-# $Id: configure.in 2183 2009-03-09 05:17:24Z thamer $
+# $Id: configure.in 10996 2009-03-09 05:17:24Z thamer $
 
 AC_PREREQ(2.57)
 AC_INIT([itools],[1.0],[developer-at-arabeyes.org])

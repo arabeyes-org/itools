@@ -1,9 +1,9 @@
 .\" -*- nroff -*-
-.\" $Id: ireminder.1 2198 2009-03-19 09:20:05Z thamer $
+.\" $Id: ireminder.1 11579 2010-05-06 13:59:19Z thamer $
 .\"
 .\" NOTE: Please adjust .TH date whenever modifying the manpage.
 .\"
-.TH IREMINDER "1" "January 05, 2005" "ireminder" "User Commands"
+.TH IREMINDER "1" "May 01, 2010" "ireminder" "User Commands"
 .\"
 .SH NAME
 ireminder \- Prayer time reminder
@@ -61,6 +61,20 @@ salat's name.
 .TP
 .B \-help
 Produce a help screen.
+.SH "EXAMPLES"
+.TP 4
+Here is an example of using \fBireminder\fR to display a message prayer time, ignoring imsaak and shorooq:
+.nf
+
+ireminder \-skip "imsaak shorooq" \-execs "notify\-send \-t 1000000 \\"Ireminder\\" \\"It is time for %s.\\"" &
+
+.TP 4
+Another Example:
+.nf
+
+ireminder -execr "xmessage %m" -execs "xmessage %m"
+
+.fi
 .SH REPORTING BUGS
 Report bugs on the web using http://bugs.arabeyes.org
 .SH AUTHOR
@@ -69,10 +83,9 @@ Written by Nadim Shaikli as part of the Arabeyes.org project.
 \fBiremidner\fR is subject to the GNU General Public License (GPL).
 .br
 Copyright \(co 2006, Arabeyes, Nadim Shaikli.
-.SH SEE ALSO
-\" .BR libitl (1).
+.SH "SEE ALSO"
+\fBipraytime(1) \- The underlying prayer times calculator used \fBiremidner\fR.
 .PP
 The ITL library (libitl) from the Islamic Tools and Libraries project.
 It is the underlying requirement for \fBireminder\fR to function.  The
 ITL library was created and is hosted at \fBwww.arabeyes.org\fR.
-

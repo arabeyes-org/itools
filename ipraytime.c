@@ -1,32 +1,32 @@
 /************************************************************************
- * $Id: ipraytime.c 2181 2009-03-09 04:17:36Z thamer $
+ * $Id: ipraytime.c 11580 2010-05-06 14:04:07Z thamer $
  *
  * ------------
  * Description:
  * ------------
- *  Copyright (c) 2004, 2009, Arabeyes, Nadim Shaikli
+ *  Copyright (c) 2004-2005 Arabeyes, Nadim Shaikli
+ *  Copyright (c) 2005-2010 Thamer Mahmoud
  *
- *  An Islamic Prayer time indicator/calculator which uses the
- *  PrayerEngine (ITL) library.
- *
- *  (*) Based on demo by Thamer Mahmoud.
+ *  An Islamic Prayer time calculator that uses libitl.
  *
  * -----------------
  * Revision Details:    (Updated by Revision Control System)
  * -----------------
- *  $Date: 2009-03-09 07:17:36 +0300 (Mon, 09 Mar 2009) $
+ *  $Date: 2010-05-06 16:04:07 +0200 (Thu, 06 May 2010) $
  *  $Author: thamer $
- *  $Revision: 2181 $
+ *  $Revision: 11580 $
  *  $Source$
  *
  * (www.arabeyes.org - under GPL license)
  ************************************************************************/
 
-/* Figure out why time of tm structure we're dealing with */
+/* Figure out what time of tm structure we're dealing with */
 #include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <locale.h>             /* for outputting degree symbol */
+#include <wchar.h>              /* for outputting degree symbol */
 #include <string.h>             /* for strlen/strcat/etc */
 #include <unistd.h>             /* for getuid */
 #include <pwd.h>                /* for getpwuid */
@@ -56,18 +56,18 @@ typedef struct
    int angle_method;        /* Angle settings/method of calculation */
    double fajrangle;        /* Fajr angle */
    double ishaaangle;       /* Ishaa angle */
-   double imsaakangle;      /* Imsaak and fajr angle differance */
+   double imsaakangle;      /* Imsaak and Fajr angle difference */
    double nearestLat;       /* Nearest latitude */
    int fajrinv;             /* Fajr Interval 90 or 120 (0:not used) */
    int ishaainv;            /* Ishaa Interval 90 or 120 (0:not used) */
-   int imsaakinv;           /* If set, Imsaak Interval from fajr is 10min */
+   int imsaakinv;           /* If set, Imsaak Interval from Fajr is 10min */
    int mathhab;             /* 1:Shaf'i, 2:Hanafi */
    int round;               /* rounding method */
    int extreme;             /* Extreme latitude calcs engaged */
    int hformat;             /* 24, 12 */
    char dst_start[8];       /* Start date of DST period in yyyymmdd */
    char dst_end[8];         /* Ending date of DST period yyyymmdd */
-   double offset_list[6];   /* adding a substracting minutes */
+   double offset_list[6];   /* add or subtract minutes */
 } sPref;
 
 
@@ -76,7 +76,7 @@ typedef struct
 **/
 void
 usage(int leave)
-{ 
+{
    char *pspaces;
    char *pname = PROG_NAME;
 
@@ -103,7 +103,6 @@ usage(int leave)
    fprintf(stderr, "%s                   [--brief]\n", pspaces);
    fprintf(stderr, "%s                   [--help]\n", pspaces);
    free(pspaces);
-
 
    if (leave)
       exit(10);
@@ -137,29 +136,21 @@ process_file(sPref *pref_data,
    char ins[50], inp1[50], inp2[50];
 
    double num;
-   char *city_name;
 
-   /* Process the RC file, if one is there */
    fp   = fopen(filename, "r");
 
    if (fp == NULL)
       return(1);
- 
+
    while (fgets(ins, sizeof(ins), fp))
    {
+
       sscanf(ins, "%s %[^\n]", inp1, inp2);
 
       if (strcasecmp(inp1, "City:") == 0)
       {
-         /* Multiple runs of this function will cause a memory leak. Check if
-          * this is our second run. */
-         if (pref_data->city)
-            free(pref_data->city);
-
-         city_name = malloc(strlen(inp2)+1);
-         strcpy(city_name, inp2);
-         pref_data->city = city_name;
-
+         pref_data->city = malloc(strlen(inp2)+1);
+         strcpy(pref_data->city, inp2);
       }
       if (strcasecmp(inp1, "Latitude:") == 0)
       {
@@ -206,7 +197,7 @@ process_file(sPref *pref_data,
          num = atof(inp2);
          pref_data->fajrangle = num;
       }
-      if ((strcasecmp(inp1, "IshaaAngle:") == 0) || 
+      if ((strcasecmp(inp1, "IshaaAngle:") == 0) ||
           (strcasecmp(inp1, "IshaAngle:") == 0))
       {
          num = atof(inp2);
@@ -222,7 +213,7 @@ process_file(sPref *pref_data,
          num = atoi(inp2);
          pref_data->fajrinv = num;
       }
-      if ((strcasecmp(inp1, "IshaaInterval:") == 0) || 
+      if ((strcasecmp(inp1, "IshaaInterval:") == 0) ||
           (strcasecmp(inp1, "IshaInterval:") == 0))
       {
          num = atoi(inp2);
@@ -253,7 +244,6 @@ process_file(sPref *pref_data,
          num = atoi(inp2);
          pref_data->hformat = num;
       }
-
       if (strcasecmp(inp1, "DST-Start:") == 0)
          strcpy(pref_data->dst_start, inp2);
 
@@ -341,7 +331,7 @@ get_rcfilename()
 
 
 /**
-   Initizlize various variables, read-in the RC file
+   Initialize various variables, read-in the RC file
 **/
 void
 do_init_file(sPref *pref_data,
@@ -349,51 +339,9 @@ do_init_file(sPref *pref_data,
              Date *date)
 {
    char *filename       = NULL;
-
-   /* Initialize some struct members */
-   pref_data->city              = (char *) NULL;
-   pref_data->lat               = -1000;
-   pref_data->lon               = -1000;
-   pref_data->utc               = -99;
-   pref_data->pressure          = -9999999;
-   pref_data->temperature       = -9999999;
-   pref_data->sealevel          = -1000;
-   pref_data->dst               = -99;
-   pref_data->angle_method      = -99;
-   pref_data->fajrangle         = -99;
-   pref_data->ishaaangle        = -99;
-   pref_data->imsaakangle       = -99;
-   pref_data->fajrinv           = -99;
-   pref_data->ishaainv          = -99;
-   pref_data->imsaakinv         = -99;
-   pref_data->mathhab           = -99;   /* 1:Shaf'i, 2:Hanafi */
-   pref_data->extreme           = -99;
-   pref_data->round             = -99;
-   pref_data->hformat           = -99;
-   pref_data->nearestLat        = -99;
-
-   pref_data->offset_list[0]    = 0;
-   pref_data->offset_list[1]    = 0;
-   pref_data->offset_list[2]    = 0;
-   pref_data->offset_list[3]    = 0;
-   pref_data->offset_list[4]    = 0;
-   pref_data->offset_list[5]    = 0;
-
-   loc->degreeLat               = -1000;
-   loc->degreeLong              = -1000;
-   loc->gmtDiff                 = -99;
-   loc->dst                     = -99;
-   
-   date->year                   = (int) NULL;
-   date->month                  = (int) NULL;
-   date->day                    = (int) NULL;
-
    filename = get_rcfilename();
-
    process_file(pref_data, filename);
-
    free(filename);
-
 }
 
 
@@ -423,6 +371,9 @@ void do_getenv(sPref *user_pref)
 
    city_name = malloc(strlen(ipt_city)+1);
    strcpy(city_name, ipt_city);
+   /* Free city string specified in rc file */
+   if (user_pref->city)
+      free(user_pref->city);
 
    user_pref->city              = city_name;
    user_pref->lat               = ipt_lat;
@@ -446,7 +397,7 @@ do_input_file(sPref *pref_data,
          error(1, "Exiting, Unable to process file specified with --file \n");
    }
    else
-      error(1, "Exiting, invalid arugment to --file \n");
+      error(1, "Exiting, invalid argument to --file \n");
 
 }
 
@@ -454,27 +405,31 @@ do_input_file(sPref *pref_data,
 void
 print_input_data(char *city_name,
                  Location *loc,
-                 double qibla,
-                 char *method_name)
+                 const char *method_name)
 {
 
    int deg, min;
    double sec;
-   const char symb = (char)0xB0;
+   double qibla;
+
+   const wchar_t *symb = L"\x00B0";
+
+   if (!setlocale(LC_CTYPE, ""))
+      fprintf(stderr, "Can't change Locale! Degree symbol won't work");
 
    printf("\n");
    printf("Prayer schedule for,\n");
 
    /* Print Cityname if there is something to print */
-   if (city_name[0] != (char) NULL)
+   if (city_name != (char*) NULL)
       printf(" City             : %s\n", city_name);
-    
-   decimal2Dms(loc->degreeLat, &deg, &min, &sec);
-   printf(" Latitude         : %03d%c %02d\' %02d\" %c\n", abs(deg), symb,
+
+decimal2Dms(loc->degreeLat, &deg, &min, &sec);
+   printf(" Latitude         : %03d%ls %02d\' %02d\" %c\n", abs(deg), symb,
           abs(min), abs(sec), (loc->degreeLat >=0 ? 'N' : 'S'));
 
    decimal2Dms(loc->degreeLong, &deg, &min, &sec);
-   printf(" Longitude        : %03d%c %02d\' %02d\" %c\n", abs(deg), symb,
+   printf(" Longitude        : %03d%ls %02d\' %02d\" %c\n", abs(deg), symb,
           abs(min), abs(sec), (loc->degreeLong >=0 ? 'E' : 'W'));
 
    printf(" Angle Method     : %s\n", method_name);
@@ -485,7 +440,7 @@ print_input_data(char *city_name,
    /* Deal with Qibla Information */
    qibla        = getNorthQibla(loc);
    decimal2Dms (qibla, &deg, &min, &sec);
-   printf(" Qibla            : %03d%c %02d\' %02d\" %c of true North\n",
+   printf(" Qibla            : %03d%ls %02d\' %02d\" %c of true North\n",
           abs (deg), symb, abs (min), abs (sec), (qibla >=0 ? 'W' : 'E'));
 
    printf("\n");
@@ -520,7 +475,7 @@ print_prayer_times(Location *loc,
 
    /* Show the results */
    printf(" [%02d-%02d-%04d]", date->day, date->month, date->year);
-   
+
 #ifdef DEBUG
    for(i=0; i<6; i++)
       printf(" %2d:%02d:%02d%c", ptList[i].hour, ptList[i].minute,
@@ -530,7 +485,7 @@ print_prayer_times(Location *loc,
       printf("   %3d:%02d", (hformat == 12 && ptList[i].hour > 12) ?
              ptList[i].hour - 12 : ptList[i].hour,  ptList[i].minute);
 #endif
-   
+
    if (!print_brief)
       printf("\n");
 }
@@ -539,7 +494,6 @@ print_prayer_times(Location *loc,
 int
 date_in_range(Date* s, Date* e, Date* cur)
 {
-     
    if (cur->month > s->month && cur->month < e->month)
       return 1;
    else if (cur->month == s->month && s->month != e->month)
@@ -577,10 +531,50 @@ timezone_dst(Date* date)
    tms = *localtime(&dsttime);
 
    return tms.tm_isdst ? tms.tm_isdst : 0;
+}
+
+void
+set_default_values(sPref *pref, Location *loc, Date *date)
+{
+
+   pref->city              = (char *) NULL;
+   pref->lat               = -1000;
+   pref->lon               = -1000;
+   pref->utc               = -99;
+   pref->pressure          = -9999999;
+   pref->temperature       = -9999999;
+   pref->sealevel          = -1000;
+   pref->dst               = -99;
+   pref->angle_method      = -99;
+   pref->fajrangle         = -99;
+   pref->ishaaangle        = -99;
+   pref->imsaakangle       = -99;
+   pref->fajrinv           = -99;
+   pref->ishaainv          = -99;
+   pref->imsaakinv         = -99;
+   pref->mathhab           = -99;
+   pref->extreme           = -99;
+   pref->round             = -99;
+   pref->hformat           = -99;
+   pref->nearestLat        = -99;
+   pref->offset_list[0]    = 0;
+   pref->offset_list[1]    = 0;
+   pref->offset_list[2]    = 0;
+   pref->offset_list[3]    = 0;
+   pref->offset_list[4]    = 0;
+   pref->offset_list[5]    = 0;
+
+   loc->degreeLat               = -1000;
+   loc->degreeLong              = -1000;
+   loc->gmtDiff                 = -99;
+   loc->dst                     = -99;
+
+   date->year                   = (int) NULL;
+   date->month                  = (int) NULL;
+   date->day                    = (int) NULL;
 
 }
 
-     
 
 /**
    Main procedure
@@ -588,47 +582,36 @@ timezone_dst(Date* date)
 int main(int argc, char *argv[])
 {
 
+   const int cal_dname[13] = { 0, 31, 28, 31, 30, 31, 30,
+                               31, 31, 30, 31, 30, 31 };
+   const char
+      *cal_mname[13]  = { "skip", "January", "February", "March",
+                          "April", "May", "June", "July", "August",
+                          "September", "October", "November", "December" };
+   const char
+      *method_name[9] = { "NONE",
+                          "Egyptian General Authority of Survey",
+                          "University of Islamic Sciences, Karachi (Shaf'i)",
+                          "University of Islamic Sciences, Karachi (Hanafi)",
+                          "Islamic Society of North America",
+                          "Muslim World League (MWL)",
+                          "Umm Al-Qurra University",
+                          "Fixed Isha Angle Interval (always 90)",
+                          "Egyptian General Authority of Survey (Egypt)"};
+
    int i;
-   int user_lat         = 0;
-   int user_lon         = 0;
-   int user_cmdline     = 0;
-   int user_defined     = 0;
+   int cal_num;
+   int is_user_lat      = 0;
+   int is_user_lon      = 0;
+   int is_user_cmdline  = 0;
+   int is_user_defined  = 0;
    int is_dst_range     = 0;
    int do_month         = 0;
    int do_rest_month    = 0;
    int do_year          = 0;
    int do_brief         = 0;
-   int utc_timezone     = 0;  
-   int angle_method     = 0;
-   double isha_angle    = -1000;
-   double fajr_angle    = -1000;
-   double qibla         = 0;
-   /* Do we have to do this again? */
-   int hformat          = -99;
-   int round            = -99;
-   int extreme          = -99;
-   int dst              = -99;
-   double utc_diff      = -99;
-   double lat           = -1000;
-   double lon           = -1000;
-   double sea           = -1000;
+   int utc_timezone     = 0;
    char city_name[50]   = "";
-   int cal_num;
-   int cal_dname[13]    = { 0, 31, 28, 31, 30, 31, 30,
-                            31, 31, 30, 31, 30, 31 };
-   char *cal_mname[13]  = { "skip", "January", "February", "March",
-                            "April", "May", "June", "July", "August",
-                            "September", "October", "November", "December" };
-   char *method_name[9] = { "NONE",
-                            "Egyptian General Authority of Survey",
-                            "University of Islamic Sciences, Karachi (Shaf'i)",
-                            "University of Islamic Sciences, Karachi (Hanafi)",
-                            "Islamic Society of North America",
-                            "Muslim World League (MWL)",
-                            "Umm Al-Qurra University",
-                            "Fixed Isha Angle Interval (always 90)",
-                            "Egyptian General Authority of Survey (Egypt)"
-};
 
    time_t mytime;
    struct tm *t_ptr;
@@ -645,6 +628,9 @@ int main(int argc, char *argv[])
    Date         dst_end;
    sPref        user_input;
 
+   /* Initialize some struct members */
+   set_default_values(&user_input, &loc, &date);
+
    /* Read-in the init RC file */
    do_init_file(&user_input, &loc, &date);
 
@@ -657,6 +643,11 @@ int main(int argc, char *argv[])
           strcasecmp(argv[i], "-file") == 0 ||
           strcasecmp(argv[i], "--file") == 0)
       {
+         /* Ignore values provided by rc file and env if a --file is
+            specified. */
+         if (user_input.city != (char *) NULL)
+            free(user_input.city);
+         set_default_values(&user_input, &loc, &date);
          do_input_file(&user_input, argv[i+1]);
       }
    }
@@ -690,37 +681,37 @@ int main(int argc, char *argv[])
       if (strcasecmp(argv[i], "-lat") == 0 ||
           strcasecmp(argv[i], "--latitude") == 0)
       {
-         user_lat        = 1;
+         is_user_lat        = 1;
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%lf", &lat);
+            sscanf(&(argv[i + 1][0]), "%lf", &user_input.lat);
          }
          else
          {
             error(1, "Exiting, invalid argument to --latitude \n");
          }
-      }  
+      }
 
       if (strcasecmp(argv[i], "-lon") == 0 ||
           strcasecmp(argv[i], "--longitude") == 0)
       {
-         user_lon        = 1;
+         is_user_lon        = 1;
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%lf", &lon);
+            sscanf(&(argv[i + 1][0]), "%lf", &user_input.lon);
          }
          else
          {
             error(1, "[%s]: Invalid argument to --longitude \n");
          }
-      }  
+      }
 
       if (strcasecmp(argv[i], "-u") == 0 ||
           strcasecmp(argv[i], "--utcdiff") == 0)
       {
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%lf", &utc_diff);
+            sscanf(&(argv[i + 1][0]), "%lf", &user_input.utc);
          }
          else
          {
@@ -733,39 +724,39 @@ int main(int argc, char *argv[])
       {
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%d", &angle_method);
+            sscanf(&(argv[i + 1][0]), "%d", &user_input.angle_method);
          }
          else
          {
             error(1, "Exiting, invalid argument to --method \n");
          }
-      }  
+      }
 
       if (strcasecmp(argv[i], "-fa") == 0 ||
           strcasecmp(argv[i], "--fajrangle") == 0)
       {
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%lf", &fajr_angle);
+            sscanf(&(argv[i + 1][0]), "%lf", &user_input.fajrangle);
          }
          else
          {
             error(1, "Exiting, invalid argument to --fajrangle \n");
          }
-      }  
+      }
 
       if (strcasecmp(argv[i], "-ia") == 0 ||
           strcasecmp(argv[i], "--ishaangle") == 0)
       {
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%lf", &isha_angle);
+            sscanf(&(argv[i + 1][0]), "%lf", &user_input.ishaaangle);
          }
          else
          {
             error(1, "Exiting, invalid argument to --ishaangle \n");
          }
-      }  
+      }
 
 
       if (strcasecmp(argv[i], "-x") == 0 ||
@@ -773,52 +764,52 @@ int main(int argc, char *argv[])
       {
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%d", &extreme);
+            sscanf(&(argv[i + 1][0]), "%d", &user_input.extreme);
          }
          else
          {
             error(1, "Exiting, invalid argument to --extreme \n");
          }
-      }  
+      }
 
       if (strcasecmp(argv[i], "-r") == 0 ||
           strcasecmp(argv[i], "--round") == 0)
       {
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%d", &round);
+            sscanf(&(argv[i + 1][0]), "%d", &user_input.round);
          }
          else
          {
             error(1, "Exiting, invalid argument to --round \n");
          }
-      }  
+      }
 
       if (strcasecmp(argv[i], "-sea") == 0 ||
           strcasecmp(argv[i], "--sea-level") == 0)
       {
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%lf", &sea);
+            sscanf(&(argv[i + 1][0]), "%lf", &user_input.sealevel);
          }
          else
          {
             error(1, "Exiting, invalid argument to --sea \n");
          }
       }
-          
+
       if (strcasecmp(argv[i], "-s") == 0 ||
           strcasecmp(argv[i], "--dst") == 0)
       {
          if (argv[i+1] != NULL)
          {
-            sscanf(&(argv[i + 1][0]), "%d", &dst);
+            sscanf(&(argv[i + 1][0]), "%d", &user_input.dst);
          }
          else
          {
             error(1, "Exiting, invalid argument to --dst \n");
          }
-      }  
+      }
 
       if (strcasecmp(argv[i], "-ss") == 0 ||
           strcasecmp(argv[i], "--dst-start") == 0)
@@ -839,8 +830,8 @@ int main(int argc, char *argv[])
       if (strcasecmp(argv[i], "-se") == 0 ||
           strcasecmp(argv[i], "--dst-end") == 0)
       {
-           
-         if (argv[i+1] != NULL) 
+
+         if (argv[i+1] != NULL)
          {
             is_dst_range = 1;
             sscanf(&(argv[i + 1][0]), "%4d", &dst_end.year);
@@ -856,9 +847,9 @@ int main(int argc, char *argv[])
       if (strcasecmp(argv[i], "-h12") == 0 ||
           strcasecmp(argv[i], "--regular-hour") == 0)
       {
-         hformat = 12;
-      }  
-      
+         user_input.hformat = 12;
+      }
+
       /* Do entire month, current or specified */
       if (strcasecmp(argv[i], "-m") == 0 ||
           strcasecmp(argv[i], "--month") == 0)
@@ -898,22 +889,22 @@ int main(int argc, char *argv[])
    }
 
    /* Note if we had user defined location */
-   user_cmdline = (user_lat || user_lon);
-   user_defined = (user_cmdline ||
-                   (user_input.lat != -1000) ||
-                   (user_input.lon != -1000)
-                   );
+   is_user_cmdline = (is_user_lat || is_user_lon);
+   is_user_defined = (is_user_cmdline ||
+                      (user_input.lat != -1000) ||
+                      (user_input.lon != -1000)
+      );
 
    /* - USER SPECIFIED SETTINGS - */
    /* Fill the city name */
-   if (user_input.city && !user_cmdline)
+   if (user_input.city && !is_user_cmdline)
    {
       sprintf(city_name, user_input.city);
       free(user_input.city);
    }
    else
    {
-      if (user_defined)
+      if (is_user_defined)
          sprintf(city_name, "Custom");
       else
          sprintf(city_name, "Makkah");
@@ -921,9 +912,8 @@ int main(int argc, char *argv[])
 
    /* Fill the Date structure - just in case */
    time(&mytime);
-   
-   t_ptr        = localtime(&mytime);
-   
+   t_ptr = localtime(&mytime);
+
 #ifdef HAVE_TM_GMTOFF
    utc_timezone = (t_ptr->tm_gmtoff / 3600);
 #else
@@ -931,62 +921,44 @@ int main(int argc, char *argv[])
    utc_timezone = (timezone / -3600);
 #endif
 
-   /* see if the date strucutre has been set to a value */
+   /* see if the date structure has been set to a value, else use today's */
    if (date.day == (int) NULL)
       date.day   = t_ptr->tm_mday;
    if (date.month == (int) NULL)
       date.month = t_ptr->tm_mon  + 1;
    if (date.year == (int) NULL)
       date.year  = t_ptr->tm_year + 1900;
-  
+
    /* Fill the location info. structure */
    /* If there are no command-line options, grab
       whatever user specified, else go default.
    */
-   if (lat == -1000)
-   {
-      if (user_input.lat != -1000)
-         loc.degreeLat  = user_input.lat;
-      else
-         loc.degreeLat  = 21.4206;
-   } else loc.degreeLat = lat;
-   
+   if (user_input.lat != -1000)
+      loc.degreeLat  = user_input.lat;
+   else
+      loc.degreeLat  = 21.4206;
 
-   if (lon == -1000)
-   {
-      if (user_input.lon != -1000)
-         loc.degreeLong = user_input.lon;
-      else
-         loc.degreeLong = 39.8304;
-   } else loc.degreeLong = lon;
-   
+   if (user_input.lon != -1000)
+      loc.degreeLong = user_input.lon;
+   else
+      loc.degreeLong = 39.8304;
+
    /* If there are no command-line timezone option, grab whatever
       user specified, else see if latitude/longitude were set and
       grab machine's timezone, else go default.
    */
-   if (utc_diff == -99)
-   {
-      if (user_input.utc != -99)
-         loc.gmtDiff    = user_input.utc;
-      else
-         loc.gmtDiff    = (user_defined ? utc_timezone : 3);
-   } else loc.gmtDiff = utc_diff;
+   if (user_input.utc != -99)
+      loc.gmtDiff    = user_input.utc;
+   else
+      loc.gmtDiff    = (is_user_defined ? utc_timezone : 3);
 
-   if (hformat == -99)
-   {
-      if (user_input.hformat != -99)
-         hformat = user_input.hformat;
-      else hformat = 24;
-   }
+   if (user_input.hformat == -99)
+      user_input.hformat = 24;
 
-
-   if (dst == -99)
-   {
-      if (user_input.dst != -99)
-         loc.dst = user_input.dst;
-      else
-         dst  =  2;
-   } else loc.dst = dst;
+   if (user_input.dst != -99)
+      loc.dst = user_input.dst;
+   else
+      user_input.dst =  2;
 
    if (!is_dst_range)
    {
@@ -998,36 +970,36 @@ int main(int argc, char *argv[])
       if (sscanf(user_input.dst_end, "%4d%2d%2d", &dst_end.year,
                  &dst_end.month, &dst_end.day) == 3) {
          is_dst_range = 1;
-      }         
+      }
    }
 
-   if (sea == -1000)
-   {
-      if (user_input.sealevel != -1000)
-         loc.seaLevel = user_input.sealevel;
-      else
-         loc.seaLevel =  0;
-   } else loc.seaLevel = sea;
+   if (user_input.sealevel != -1000)
+      loc.seaLevel = user_input.sealevel;
+   else
+      loc.seaLevel =  0;
 
    if (user_input.pressure != -9999999)
-         loc.pressure = user_input.pressure;
+      loc.pressure = user_input.pressure;
    else loc.pressure = 1010;
 
    if (user_input.temperature != -9999999)
-         loc.temperature = user_input.temperature;
+      loc.temperature = user_input.temperature;
    else loc.temperature = 10;
-   
-   if (angle_method == 0)
+
+   /* Enact some pre-defined calculation methods/settings */
+   if (user_input.angle_method != -99 &&
+       (user_input.angle_method >= 0 &&
+        user_input.angle_method <= sizeof(method_name)/sizeof(char*)-1))
    {
-      if (user_input.angle_method != -99)
-         angle_method   = user_input.angle_method;
-      else
-         angle_method   = (angle_method ? angle_method : 6);
+      getMethod(user_input.angle_method, &conf);
    }
-   
-   /* Inact some pre-defined calculation methods/settings */
-   getMethod(angle_method, &conf);
-   
+   else
+   {
+      /* Set default, used later */
+      user_input.angle_method = 6;
+      getMethod(6, &conf);
+   }
+
    /* Fill the Calculation method structure (user defined values) */
    if (user_input.fajrangle != -99)
       conf.fajrAng         = user_input.fajrangle;
@@ -1064,29 +1036,18 @@ int main(int argc, char *argv[])
       conf.offList[5]= user_input.offset_list[5];
    conf.offset=1;
 
-   /* Override all other settings with what is passed by the command
-    * line */
-   if (extreme != -99)
-      conf.extreme = extreme;
-   if (round != -99)
-      conf.round = round;
-   if (fajr_angle != -1000)
-      conf.fajrAng = fajr_angle;
-   if (isha_angle != -1000)
-      conf.ishaaAng = isha_angle;
-
    /* Determine today's DST status and set the DST library flag
     * (loc.dst) */
-   if (dst == 2)
+   if (user_input.dst == 2)
    {
       if (is_dst_range)
          loc.dst = date_in_range(&dst_start, &dst_end, &date);
       else loc.dst = timezone_dst(&date);
-   } 
-   
+   }
+
    /* Echo back data used */
    if (!do_brief)
-      print_input_data(&city_name[0], &loc, qibla, method_name[angle_method]);
+      print_input_data(city_name, &loc, method_name[user_input.angle_method]);
 
    /* Determine number of days in month */
    if (do_rest_month || do_month || do_year)
@@ -1107,7 +1068,7 @@ int main(int argc, char *argv[])
             /* Set length of box per month name + year + spaces.*/
             len = strlen(cal_mname[date.month])+8;
 
-	    /* Make room for appending? Changed to fix glibc crashes */
+            /* Make room for appending? Changed to fix glibc crashes */
             dashes = malloc(len+2);
             strncpy(dashes, "+---------------------------", len);
 
@@ -1145,14 +1106,15 @@ int main(int argc, char *argv[])
          for (date.day = start_day; (date.day <= cal_num); date.day++)
          {
             /* Get dst status of today */
-            if (dst == 2)
+            if (user_input.dst == 2)
             {
                if (is_dst_range)
                   loc.dst = date_in_range(&dst_start, &dst_end, &date);
                else loc.dst = timezone_dst(&date);
             }
-                
-            print_prayer_times(&loc, &conf, &date, ptList, 0,  hformat);
+
+            print_prayer_times(&loc, &conf, &date, ptList, 0,
+                               user_input.hformat);
          }
 
          if (do_year)
@@ -1167,14 +1129,15 @@ int main(int argc, char *argv[])
       print_banner();
 
       /* Doing a single day */
-      print_prayer_times(&loc, &conf, &date, ptList, do_brief, hformat);
+      print_prayer_times(&loc, &conf, &date, ptList, do_brief,
+                         user_input.hformat);
 
       if (!do_brief)
       {
          getNextDayImsaak(&loc, &conf, &date, &nextImsaak);
          getNextDayFajr(&loc, &conf, &date, &nextFajr);
          getImsaak(&loc, &conf, &date, &Imsaak);
-          
+
          printf("\n");
          printf("Today's Imsaak    : %3d:%02d\n", Imsaak.hour,
                 Imsaak.minute);
@@ -1186,11 +1149,6 @@ int main(int argc, char *argv[])
    }
 
    printf("\n");
-
-   /* FIXIT: Added these lines to fix crashes, as the new glibc seems to be more
-    * strict on handling memory issues? */
-   if(user_input.city)
-      free(user_input.city);
 
    return(0);
 }

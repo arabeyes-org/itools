@@ -1,6 +1,6 @@
 #!/bin/sh
 #--
-# $Id: autogen.sh 1936 2006-10-05 19:33:43Z thamer $
+# $Id: autogen.sh 10749 2006-10-05 19:33:43Z thamer $
 #--
 
 # Handle arguments

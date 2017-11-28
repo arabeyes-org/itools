@@ -1,5 +1,5 @@
 .\" \" -*- nroff -*-
-.\" \" $Id: ipraytime.1 2198 2009-03-19 09:20:05Z thamer $
+.\" \" $Id: ipraytime.1 11579 2010-05-06 13:59:19Z thamer $
 .\" \" 
 .\" \" - Define 'example' macro
 .\" .de EX
@@ -21,7 +21,7 @@
 .\" \" 
 .\" \" 
 .\" 
-.TH "IPRAYTIME" "1" "March 17, 2009" "ipraytime" "User Commands"
+.TH "IPRAYTIME" "1" "May 1, 2010" "ipraytime" "User Commands"
 .SH "NAME"
 ipraytime \- An Islamic Prayer Times Calculator
 .\"
@@ -63,50 +63,47 @@ ipraytime \- An Islamic Prayer Times Calculator
 .RB [ \-\-brief ]
 .RB [ \-\-help ]
 .SH "DESCRIPTION"
-The \fBipraytime\fR program is a generator of Islamic prayer time
-schedules for any given location.  \fBipraytime\fR also calculates
-the appropriate Qibla direction (heading towards the Kabaa) based
-on the given location.  \fBipraytime\fR in its single day format
-is also capable of calculating Imsaak times (ie. the times when one
-is to start fasting).  \fBipraytime\fR is also capable of generating
-a schedule for an entire month or year based on command\-line arguments.
-The program is also able to print the schedules for the rest of the
-current month so as to skip days that have already passed.
-\fBipraytime\fR also has a minimalistic option to simply show
-a one liner of the prayer times in its single day format.
+\fBipraytime\fR is a generator of Islamic prayer times for any given
+location. It is capable of generating daily, monthly, and yearly
+schedules based on user specified settings. In its single day output
+format, it can calculate the appropriate Qibla direction (heading
+towards the Kabaa) and Imsaak time (the time when one is to start
+fasting). \fBipraytime\fR also has a minimalistic option to show a
+brief one\-liner showing prayer times for a single day.
 .PP 
-\fBipraytime\fR has multiple ways of conveying info and settings to it.
-The order of precedence (from highest to lowest) is, the command\-line
-followed by the environment variable setting (IPT_DATA) to the data being
-presented in \fBipraytime\fR's RC file (\fI~/.iprayrc\fR) in one's home directory.
-If none of the above is found, \fBipraytime\fR defaults to using Makkah's
-location with the host machine's current date settings.
+
+\fBipraytime\fR is configured using a file in the user's home
+directory (\fI~/.iprayrc\fR). For configuration and usage samples, see
+the \fBEXAMPLES\fR section below. It is also possible to specify
+settings using an environment variable (IPT_DATA) or through passing
+arguments to the command line (which takes precedent over all other
+settings). If none of the above is found, \fBipraytime\fR defaults to
+using Makkah's location with the host machine's current date settings.
 .SH "OPTIONS"
-\fBipraytime\fR follows the usual GNU command line syntax, with long
-options starting with two dashes (`\-').  A summary of all options is
+A summary of all command\-line arguments and configuration options are
 noted below:
 .TP 
 .B \-h, \-\-help
-Show summary of options
+Show summary of options.
 .TP 
 .B \-d, \-\-date \fIyyyymmdd\fR
 Specify the Gregorian date to use where `y' stands for
-year, `m' for month and `d' for day
+year, `m' for month and `d' for day.
 .TP 
 .B \-lat, \-\-latitude \fIreal_num\fR
 Specify the latitude setting to use during calculations.  The value
-could be any real number
+could be any real number.
 .TP 
 .B \-lon, \-\-longitude \fIreal_num\fR
 Specify the longitude setting to use during calculations.  The value
-could be any real number
+could be any real number.
 .TP 
 .B \-sea, \-\-sea\-level \fIreal_num\fR
-Specify height above Sea level (in meters)
+Specify height above Sea level (in meters).
 .TP 
 .B \-u, \-\-utcdiff \fIreal_num\fR
 Specify the difference between the specified timezone and that of GMT/UTC.
-The value could be any real number
+The value could be any real number.
 .TP 
 .B \-a, \-\-anglemethod \fI[int_num]\fR
 Specify which angle method calculation to use.  The angle methods that are
@@ -225,7 +222,7 @@ Regular Rounding. If seconds are equal to 30 or above, add 1 minute.
 .TP 4
 .B 2
 Special Rounding. Similar to regular rounding but we always round down
-for Shurooq and Imsaak times. (This is the default method)
+for Shurooq and Imsaak times. (This is the default method).
 .TP 4
 .B 3
 Aggressive Rounding. Similar to Special Rounding but we add 1 minute
@@ -304,28 +301,28 @@ Minutes from Shorooq/Maghrib: Fajr and Isha [If invalid]
 \fBipraytime\fR is capable of loading settings from a configuration
 file (\fI~/.iprayrc\fR). The default location of the configuration
 file can be changed using the \-\-file option. The content of the file
-should be in the following syntax, `variable_string: value'. See the
-EXAMPLES section for usage examples. Below is a list of all supported
-settings which can be used in the configuration file:
+should be in the following syntax `variable_string: value'. See the
+\fBEXAMPLES\fR section for usage examples. Below is a list of all the
+supported settings which can be used in the configuration file:
 .SS "Location Settings"
 .TP 2
 .B City
-Specifies an informational city name string to be displayed for reference
+Specifies an informational city name string to be displayed for reference.
 .TP 2
 .B Latitude
 Specify the latitude setting to use during calculations.  The value
-could be any real number
+could be any real number.
 .TP 2
 .B Longitude
 Specify the longitude setting to use during calculations.  The value
-could be any real number
+could be any real number.
 .TP 2
 .B UTC
 Specify the difference between the specified timezone and that of GMT/UTC.
-The value could be any real number
+The value could be any real number.
 .TP 2
 .B SeaLevel
-Specify height above Sea level (in meters)
+Specify height above Sea level (in meters).
 .TP 2
 .B Pressure
 Specify the atmospheric pressure in millibars. The default value is 1010. 
@@ -341,13 +338,13 @@ a positive integer of one of the supported methods. See the
 .TP 2
 .B Mathhab
 Specify which mathhab to use in one's calculations.  The current
-supported value are 1 for Shaf'i and 2 for Hanafi
+supported value are 1 for Shaf'i and 2 for Hanafi.
 .TP 2
 .B OffsetList
 Specify a list of values in minutes to add or subtract any amount of
 minutes from the daily computed prayer times. For example, If you want
 to add 30 seconds to Maghrib and subtract 2 minutes from Isha, you
-will set this option to `0 0 0 0 0.5 -2'.
+will set this option to `0 0 0 0 0.5 \-2'.
 .TP 2
 .B FajrAngle
 Specify the fajr angle to use during calculations. Will override the
@@ -387,25 +384,29 @@ Specify which method to use for rounding seconds. The value needs to
 be an integer of one of the supported rounding methods.  See
 the \-\-round option for a list of the supported methods.
 .SS "Daylight Saving Time Settings"
+By default, \fBipraytime\fR uses the host's machine timezone
+information to determine whether daylight saving time is in effect or
+not. If this information is unavailable or not accurate, these options
+provide the means to explicitly set the DST status.
 .TP 2
 .B DST
 Specify the current DST status. Set this to 0 to completely disable
-daylight saving time. Or set it to 1 to always add one hour to the
-computed prayer times. See the \-\-dst option for more information.
+daylight saving time. Set it to 1 to always add one hour to the
+computed prayer times.
 .TP 2
 .B DST\-Start
 Specify the start date when daylight saving time adjustment is in
 effect for your location. This value should be a valid date in yyyymmdd
-form
+form.
 .TP 2
 .B DST\-End
 Specify the date when daylight saving time adjustment period
-ends. This value should be a valid date in yyyymmdd form
+ends. This value should be a valid date in yyyymmdd form.
 .SS "Display Settings"
 .TP 2
 .B HourFormat
 Specify a time format for displaying the prayer times. The value should
-be 12 (regular time) or 24 (military time)
+be 12 (regular time) or 24 (military time).
 .SH "ENVIRONMENT"
 .TP 10
 .B IPT_DATA
@@ -428,15 +429,17 @@ Longitude: 4.3333
 UTC: 1
 AngleMethod: 2
 Mathhab: 1
-OffsetList: 0 0 1 2.21 3 -1
+OffsetList: 0 0 1 2.21 3 \-1
 .fi
 .TP 4
-Examples of using the command line options:
+Examples of using the command\-line options:
 .nf
 
-ipraytime -y 2007
+ipraytime \-y 2007
 
-ipraytime -lat 29.5000 -lon 47.7500 -u 3 --anglemethod 2 -d 20071229 -h12
+ipraytime \-f /home/user/.iprayrc\-Oman
+
+ipraytime \-lat 29.5000 \-lon 47.7500 \-u 3 \-\-anglemethod 2 \-d 20071229 \-h12
 
 .fi
 .SH "REPORTING BUGS"
@@ -448,7 +451,11 @@ Arabeyes.org project.
 \fBipraytime\fR is subject to the GNU General Public License (GPL).
 .br 
 Copyright \(co 2005, Arabeyes, Nadim Shaikli.
+.br
+Copyright \(co 2005\-2010 Thamer Mahmoud
+
 .SH "SEE ALSO"
+\fBireminder\fR(1) \- Prayer time reminder script that uses \fBipraytime\fR.
 \" .BR libitl (1).
 .PP 
 The ITL library (libitl) from the Islamic Tools and Libraries project.

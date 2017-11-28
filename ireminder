@@ -2,7 +2,7 @@
 # -*-Perl-*-
 
 #---
-# $Id: ireminder 1939 2006-10-11 20:52:09Z nadim $
+# $Id: ireminder 10752 2006-10-11 20:52:09Z nadim $
 #
 # ------------
 # Description:
@@ -20,9 +20,9 @@
 # -----------------
 # Revision Details:     (Updated by Revision Control System)
 # -----------------
-#  $Date: 2006-10-11 23:52:09 +0300 (Wed, 11 Oct 2006) $
+#  $Date: 2006-10-11 22:52:09 +0200 (Wed, 11 Oct 2006) $
 #  $Author: nadim $
-#  $Revision: 1939 $
+#  $Revision: 10752 $
 #  $Source$
 #
 #  (www.arabeyes.org - under GPL license)
@@ -68,16 +68,6 @@ if ($opt{help}) { &help(); }
 %opt		= %{&listify_input(\%opt, "skip")};
 %opt		= %{&listify_input(\%opt, "reminder")};
 
-$ipraytime	= $opt{ipraytime}	|| "ipraytime";
-@reminders	= @{$opt{reminder}} ? @{$opt{reminder}} : ( 1, 5, 10, 20);
-
-if (!-x $ipraytime)
-{
-    die "$ID ERROR - can't find $ipraytime \n";
-}
-
-# Enumerate the events we'll track and report on
-$ID		= "[$in_script]";
 # Account for various places the ipraytime binary could reside-in
 @bin_paths	= ("/usr/bin/", "/usr/local/bin/", "");
 foreach my $entry (@bin_paths)
