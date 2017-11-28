@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #---
-# $Id: ireminder.pl,v 1.4 2004/08/18 22:09:16 nadim Exp $
+# $Id: ireminder,v 1.5 2004/12/30 00:40:55 nadim Exp $
 #
 # ------------
 # Description:
@@ -19,10 +19,10 @@
 # -----------------
 # Revision Details:     (Updated by Revision Control System)
 # -----------------
-#  $Date: 2004/08/18 22:09:16 $
+#  $Date: 2004/12/30 00:40:55 $
 #  $Author: nadim $
-#  $Revision: 1.4 $
-#  $Source: /home/arabeyes/cvs/projects/itl/programs/itools/ireminder.pl,v $
+#  $Revision: 1.5 $
+#  $Source: /home/arabeyes/cvs/projects/itl/programs/itools/ireminder,v $
 #
 #  (www.arabeyes.org - under GPL license)
 #---
@@ -51,6 +51,7 @@ $in_spaces	= $in_script;
 $in_spaces	=~ s/\S/ /g;
 
 $version	= " (v - %I%)";
+$ID		= "[$in_script]";
 
 # Process the command line
 &get_args();
@@ -72,12 +73,34 @@ if (!-x $ipraytime)
 
 # Enumerate the events we'll track and report on
 $ID		= "[$in_script]";
+# Account for various places the ipraytime binary could reside-in
+@bin_paths	= ("/usr/bin/", "/usr/local/bin/", "");
+foreach my $entry (@bin_paths)
+{
+    $bin_path = "${entry}ipraytime";
+    if (-x $bin_path)
+    {
+	# OK, found something I can use
+	last;
+    }
+}
+$ipraytime	= $opt{ipraytime}	|| $bin_path;
+
+# Set some default reminder settings
+@reminders	= @{$opt{reminder}} ? @{$opt{reminder}} : (1, 5, 10, 20);
+
+# Enumerate the events we'll track and report on
 $DAY_TOT_SEC	= (24 * 60 * 60);
 @EVENTS		= (qw/imsaak fajr shorooq zuhr asr maghrib isha/);
 
 # Set some defaults
 $doing_2moro	= 0;
 $time_to_use	= time();
+
+if (!-x $ipraytime)
+{
+    &usage(1, "$ID ERROR - can't find '$ipraytime' \n");
+}
 
 # Continuously cycle through
 for (;;)
@@ -467,8 +490,10 @@ sub play_sound
 # Print short usage info
 sub usage
 {
-    my ($die_after)	= @_;
+    my ($die_after,
+	$err_msg)	= @_;
 
+    if (defined $err_msg) { print $err_msg; }
     print qq
 |Usage: $in_script [-ipraytime path]
        $in_spaces [-skip event_name]
@@ -511,5 +536,5 @@ sub get_args
 		"reminder=s@",	# array'ed list of reminder times (minutes)
 		"inplace",	# specify to print in-place outputs (no scroll)
 		"help",		# print a brief help screen
-		) || ( $? = 257, die"$ID ERROR - Invalid argument\n" );
+		) || ( $? = 257, &usage(1, "$ID ERROR - Invalid argument\n") );
 }

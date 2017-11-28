@@ -16,7 +16,10 @@
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
+DESTDIR		:= debian/itools
+mandir		:= $(DESTDIR)/usr/share/man
 
+install_file	:= install -m 644
 
 CFLAGS = -Wall -g
 
@@ -49,12 +52,12 @@ build-arch-stamp: configure-stamp
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-arch-stamp build-indep-stamp #CONFIGURE-STAMP#
+#	rm -f build-arch-stamp build-indep-stamp #CONFIGURE-STAMP#
 
 	# Add here commands to clean up after the build process.
 	-$(MAKE) clean
 	# Is this right?
-	-rm -f config.log config.status config.cache
+	rm -f config.log config.status config.cache
 	dh_clean 
 
 install: install-arch
@@ -90,7 +93,7 @@ binary-common:
 	dh_installchangelogs 
 	dh_installdocs
 	dh_installexamples
-	dh_installman doc/ical.1 doc/idate.1 doc/ipraytime.1
+	dh_installman doc/ical.1 doc/idate.1 doc/ipraytime.1 doc/ireminder.1
 	dh_link
 	dh_strip
 	dh_compress 

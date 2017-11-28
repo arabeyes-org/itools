@@ -1,9 +1,9 @@
 .\" -*- nroff -*-
-.\" $Id: ical.1,v 1.5 2004/12/28 21:24:05 nadim Exp $
+.\" $Id: ical.1,v 1.6 2005/01/05 21:24:26 nadim Exp $
 .\"
 .\" NOTE: Please adjust .TH date whenever modifying the manpage.
 .\"
-.TH IDATE 1 "December 16, 2004"
+.TH IDATE "1" "January 05, 2005" "ical" "User Commands"
 .\"
 .SH NAME
 ical \- A Hijri/Islamic calendar (and converter)
@@ -11,9 +11,9 @@ ical \- A Hijri/Islamic calendar (and converter)
 .SH SYNOPSIS
 .B ical
 .RB [ \-\-gregorian
-.RI   yyyymmdd ]
+.RI   yyyymmdd]
 .RB [ \-\-hijri
-.RI   yyyymmdd ]
+.RI   yyyymmdd]
 .RB [ \-\-umm_alqura ]
 .RB [ \-\-fixed_view ]
 .RB [ \-\-dual ]
@@ -85,18 +85,19 @@ as opposed to using an empirical mathematic certainty.  The methods
 presented in this application and its underlying ITL library are
 strictly arithmetic in nature and do NOT take moon-phases into
 consideration (in short, observational approximation is not used).
+.SH LIMITATIONS
+There is currently no Umm Al-Qura support.
+.SH REPORTING BUGS
+Report bugs on the web using http://bugs.arabeyes.org
 .SH AUTHOR
 Written by Nadim Shaikli as part of the Arabeyes.org project.
 .SH COPYRIGHT
 \fBical\fR is subject to the GNU General Public License (GPL).
-.SH LIMITATIONS
-There is currently no Umm Al-Qura support.
-.SH REPORTING BUGS
-Report bugs on the web using http://bugs.arabeyes.org/ or send
-to <bugs -at- arabeyes.org>
+.br
+Copyright \(co 2005, Arabeyes, Nadim Shaikli.
 .SH SEE ALSO
 \" .BR libitl (1).
 .PP
-The ITL (Islamic Tools Library) is the underlying requirement for
+The ITL (Islamic Tools Library).  It is the underlying requirement for
 \fBical\fR to function.  The ITL library was created and is hosted
 at \fBwww.arabeyes.org\fR.

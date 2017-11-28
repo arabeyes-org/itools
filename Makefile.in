@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.3 2004/12/27 16:20:02 thamer Exp $
+# $Id: Makefile.in,v 1.6 2005/01/09 13:46:42 thamer Exp $
 
 PREFIX		= @prefix@
 
@@ -37,13 +37,14 @@ install: all
 	cp ical $(PREFIX)/bin
 	cp idate $(PREFIX)/bin
 	cp ipraytime $(PREFIX)/bin
-	cp ireminder.pl $(PREFIX)/bin
+	cp ireminder $(PREFIX)/bin
 	test -d $(PREFIX)/man/man1 \
 	|| mkdir -p $(PREFIX)/man/man1\
 	|| exit 1;
 	cp doc/ical.1 $(PREFIX)/man/man1
 	cp doc/idate.1 $(PREFIX)/man/man1
 	cp doc/ipraytime.1 $(PREFIX)/man/man1
+	cp doc/ireminder.1 $(PREFIX)/man/man1
 
 
 debinstall: all
@@ -54,8 +55,7 @@ debinstall: all
 	cp ical $(PREFIX)/bin
 	cp idate $(PREFIX)/bin
 	cp ipraytime $(PREFIX)/bin
-	cp ipraytime $(PREFIX)/bin
-	cp ireminder.pl $(PREFIX)/bin
+	cp ireminder $(PREFIX)/bin
 
 
 uninstall:
@@ -63,10 +63,11 @@ uninstall:
 	rm -f $(PREFIX)/bin/ical $(PREFIX)/man/man1/ical.1
 	rm -f $(PREFIX)/bin/idate $(PREFIX)/man/man1/idate.1
 	rm -f $(PREFIX)/bin/ipraytime $(PREFIX)/man/man1/ipraytime.1
-	rm -f $(PREFIX)/bin/ireminder.pl
+	rm -f $(PREFIX)/bin/ireminder $(PREFIX)/man/man1/ireminder.1
 clean:
 	rm -f *.o *~ ical idate ipraytime
 
 distclean: autogen.sh clean
 	fakeroot $(MAKE) -k -f debian/rules clean
+	rm -f configure-stamp build-arch-stamp
 	./autogen.sh clean

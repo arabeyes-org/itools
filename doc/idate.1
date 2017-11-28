@@ -1,9 +1,9 @@
 .\" -*- nroff -*-
-.\" $Id: idate.1,v 1.4 2004/12/16 18:38:12 thamer Exp $
+.\" $Id: idate.1,v 1.5 2005/01/05 21:24:26 nadim Exp $
 .\"
 .\" NOTE: Please adjust .TH date whenever modifying the manpage.
 .\"
-.TH IDATE 1 "December 16, 2004"
+.TH IDATE "1" "January 05, 2005" "idate" "User Commands"
 .\"
 .SH NAME
 idate \- A Gregorian/Meladi to/from Hijri/Islamic date converter
@@ -73,18 +73,19 @@ as opposed to using an empirical mathematic certainty.  The methods
 presented in this application and its underlying ITL library are
 strictly arithmetic in nature and do NOT take moon-phases into
 consideration (in short, observational approximation is not used).
+.SH LIMITATIONS
+The Umm Al-Qura option doesn't function with pre-epoch settings.
+.SH REPORTING BUGS
+Report bugs on the web using http://bugs.arabeyes.org
 .SH AUTHOR
 Written by Nadim Shaikli as part of the Arabeyes.org project.
 .SH COPYRIGHT
 \fBidate\fR is subject to the GNU General Public License (GPL).
-.SH LIMITATIONS
-The Umm Al-Qura option doesn't function with pre-epoch settings.
-.SH REPORTING BUGS
-Report bugs on the web using http://bugs.arabeyes.org/ or send to
-<bugs -at- arabeyes.org>
+.br
+Copyright \(co 2005, Arabeyes, Nadim Shaikli.
 .SH SEE ALSO
 \" .BR libitl (1).
 .PP
-The ITL (Islamic Tools Library) is the underlying requirement for idate
-to function.  The ITL library was created and is hosted at
+The ITL (Islamic Tools Library).  It is the underlying requirement for
+\fBidate\fR to function.  The ITL library was created and is hosted at
 \fBwww.arabeyes.org\fR.
