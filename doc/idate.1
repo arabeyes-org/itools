@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: idate.1,v 1.5 2005/01/05 21:24:26 nadim Exp $
+.\" $Id: idate.1 2198 2009-03-19 09:20:05Z thamer $
 .\"
 .\" NOTE: Please adjust .TH date whenever modifying the manpage.
 .\"
@@ -14,6 +14,7 @@ idate \- A Gregorian/Meladi to/from Hijri/Islamic date converter
 .RI   yyyymmdd ]
 .RB [ \--hijri
 .RI   yyyymmdd ]
+.RB [ \--simple]
 .RB [ \--umm_alqura ]
 .RB [ \--help ]
 .SH DESCRIPTION
@@ -46,6 +47,9 @@ year, 'm' for month and 'd' for day
 .B \-hi, \-\-hijri \fIyyyymmdd\fR
 Specify the Hijri date to be converted where 'y' stands for
 year, 'm' for month and 'd' for day
+.TP
+.B \-s, \-\-simple
+Specify a simplified output mode
 .TP
 .B \-u, \-\-umm_alqura
 Specify to use the Umm Al-Qura calculation method (used mostly in
@@ -86,6 +90,6 @@ Copyright \(co 2005, Arabeyes, Nadim Shaikli.
 .SH SEE ALSO
 \" .BR libitl (1).
 .PP
-The ITL (Islamic Tools Library).  It is the underlying requirement for
-\fBidate\fR to function.  The ITL library was created and is hosted at
-\fBwww.arabeyes.org\fR.
+The ITL library (libitl) from the Islamic Tools and Libraries project.
+It is the underlying requirement for \fBidate\fR to function.  The
+ITL library was created and is hosted at \fBwww.arabeyes.org\fR.

@@ -33,7 +33,6 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	./autogen.sh
 	./configure prefix=$(CURDIR)/debian/itools/usr
 
 	touch configure-stamp
@@ -55,7 +54,6 @@ clean:
 #	rm -f build-arch-stamp build-indep-stamp #CONFIGURE-STAMP#
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) clean
 	# Is this right?
 	rm -f config.log config.status config.cache
 	dh_clean 

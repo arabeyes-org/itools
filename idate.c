@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: idate.c,v 1.5 2004/07/16 00:39:56 nadim Exp $
+ * $Id: idate.c 2181 2009-03-09 04:17:36Z thamer $
  *
  * ------------
  * Description:
@@ -21,10 +21,10 @@
  * -----------------
  * Revision Details:    (Updated by Revision Control System)
  * -----------------
- *  $Date: 2004/07/16 00:39:56 $
- *  $Author: nadim $
- *  $Revision: 1.5 $
- *  $Source: /home/arabeyes/cvs/projects/itl/programs/itools/idate.c,v $
+ *  $Date: 2009-03-09 07:17:36 +0300 (Mon, 09 Mar 2009) $
+ *  $Author: thamer $
+ *  $Revision: 2181 $
+ *  $Source$
  *
  * (www.arabeyes.org - under GPL license)
  ************************************************************************/
@@ -42,7 +42,9 @@
    - Add a proper 'man' page and documentation
 */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>             /* for strlen/strcat/etc */
 
 /* For time_t */
 #ifdef TM_IN_SYS_TIME
@@ -79,6 +81,7 @@ usage(int leave)
    strncpy(pspaces, "                      ", strlen(pname));
 
    fprintf(stderr, "%s [--gregorian yyyymmdd] [--hijri yyyymmdd]\n", pname);
+   fprintf(stderr, "%s                        [--simple]\n", pspaces);
    fprintf(stderr, "%s                        [--umm_alqura]\n", pspaces);
    fprintf(stderr, "%s                        [--help]\n", pspaces);
 
@@ -141,38 +144,54 @@ do_init(Date *mydate,
   Printout the results
  **/
 void
-display_output(int using_umm_alqura,
+display_output(int simple_mode,
+	       int using_umm_alqura,
 	       Date *indate,
 	       sDate *rdate)
 {
    int i;
 
-   printf("Date Format (dd/mm/yyyy)");
-
-   if (using_umm_alqura)
-      printf(" [using Umm-AlQura Algorithm]:\n");
+   /* See if we're only to print out a simple output */
+   if (simple_mode)
+   {
+      printf("%2d/%2d/%4d %s", rdate->day,
+	     		       rdate->month,
+	     		       rdate->year,
+	     		       rdate->units);
+      printf(" - %s(%s) - %s(%s)\n", rdate->to_dname,
+	     			     rdate->to_dname_sh,
+	     			     rdate->to_mname,
+	     			     rdate->to_mname_sh);
+   }
    else
-      printf(":\n");
+   {
+      printf("Date Format (dd/mm/yyyy)");
 
-   printf("+ Input    : %2d/%2d/%4d    ", indate->day,
-	  			          indate->month,
-	  			          indate->year);
+      if (using_umm_alqura)
+	 printf(" [using Umm-AlQura Algorithm]:\n");
+      else
+	 printf(":\n");
 
-   printf("  - %10s(%s) - %12s(%s)\n", rdate->frm_dname,
-	  			       rdate->frm_dname_sh,
-	  			       rdate->frm_mname,
-	  			       rdate->frm_mname_sh);
+      printf("+ Input    : %2d/%2d/%4d    ", indate->day,
+	  			             indate->month,
+	  			             indate->year);
 
-   printf("-----------------------------\n");
-   printf("+ Output   : %2d/%2d/%4d %s", rdate->day,
-	  			         rdate->month,
-	  				 rdate->year,
-      					 rdate->units);
+      printf("  - %10s(%s) - %12s(%s)\n", rdate->frm_dname,
+	  			          rdate->frm_dname_sh,
+	  			          rdate->frm_mname,
+	  			          rdate->frm_mname_sh);
 
-   printf("  - %10s(%s) - %12s(%s)\n", rdate->to_dname,
-	  			       rdate->to_dname_sh,
-	  			       rdate->to_mname,
-	  			       rdate->to_mname_sh);
+      printf("-----------------------------\n");
+      printf("+ Output   : %2d/%2d/%4d %s", rdate->day,
+	  			            rdate->month,
+	  				    rdate->year,
+      					    rdate->units);
+
+      printf("  - %10s(%s) - %12s(%s)\n", rdate->to_dname,
+	  			          rdate->to_dname_sh,
+	  			          rdate->to_mname,
+	  			          rdate->to_mname_sh);
+   }
 
    /* Print out any event(s) on the specified date */
    if (rdate->event[0])
@@ -195,6 +214,7 @@ int main(int argc, char *argv[])
    int i;
    int g_to_h		= 0;
    int h_to_g		= 0;
+   int simple_mode	= 0;
    int use_umm_alqura	= 0;
    int error_lib	= 0;
    Date indate;
@@ -251,6 +271,13 @@ int main(int argc, char *argv[])
         }
      }
 
+     if (strcasecmp(argv[i], "-s") == 0 ||
+         strcasecmp(argv[i], "-simple") == 0 ||
+         strcasecmp(argv[i], "--simple") == 0)
+     {
+	 simple_mode = 1;
+     }
+
      if (strcasecmp(argv[i], "-u") == 0 ||
          strcasecmp(argv[i], "-umm_alqura") == 0 ||
          strcasecmp(argv[i], "--umm_alqura") == 0)
@@ -261,7 +288,7 @@ int main(int argc, char *argv[])
 
    /* Make sure user knows what they are doing */
    if (g_to_h && h_to_g)
-      error(2, "Exiting, can't defined both Gregorian and Hijri\n");
+      error(2, "Exiting, can't define both Gregorian and Hijri\n");
 
    /* Go with default current date if not user specifications */
    if (!g_to_h && !h_to_g)
@@ -315,7 +342,7 @@ int main(int argc, char *argv[])
    }
 
    /* Spill-out the results */
-   display_output(use_umm_alqura, &indate, &outdate);
+   display_output(simple_mode, use_umm_alqura, &indate, &outdate);
 
    return(0);
 }

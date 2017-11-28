@@ -1,12 +1,13 @@
 #!/usr/bin/perl
+# -*-Perl-*-
 
 #---
-# $Id: ireminder,v 1.5 2004/12/30 00:40:55 nadim Exp $
+# $Id: ireminder 1939 2006-10-11 20:52:09Z nadim $
 #
 # ------------
 # Description:
 # ------------
-#  Copyright (c) 2004, Arabeyes, Nadim Shaikli
+#  Copyright (c) 2006, Arabeyes, Nadim Shaikli
 #
 #  This is a prayer (and other Islamic events) reminder program.
 #  Its a wrapper that uses Arabeyes.org's ITL package (ipraytime
@@ -19,24 +20,28 @@
 # -----------------
 # Revision Details:     (Updated by Revision Control System)
 # -----------------
-#  $Date: 2004/12/30 00:40:55 $
+#  $Date: 2006-10-11 23:52:09 +0300 (Wed, 11 Oct 2006) $
 #  $Author: nadim $
-#  $Revision: 1.5 $
-#  $Source: /home/arabeyes/cvs/projects/itl/programs/itools/ireminder,v $
+#  $Revision: 1939 $
+#  $Source$
 #
 #  (www.arabeyes.org - under GPL license)
 #---
 
 # TODO:
 # - have it fork in the background if a similar process doesn't already
-#   exist else kill the other process post a confirm (optionally)
+#   exists else kill the other process post a confirm (optionally)
 # - have it print to the console not stdout (optionally)
-# - clean-up the sound/bell stuff
-# - have it be able to play reminder and Azan sounds (optionally)
-# - have it spawn a GUI reminder/now dialogs (optionally)
+
+# SAMPLES:
+# - to engage a GUI:
+#   ireminder -execr "xmessage %m -nearmouse -timeout 30"
+#   ireminder -execr "xmessage %m" -execs "xmessage %m"
+#   ireminder -execr "xmessage Next salat is %s"
 
 use Getopt::Long;
 
+use POSIX;
 use FileHandle;
 STDOUT->autoflush(1);
 
@@ -99,7 +104,7 @@ $time_to_use	= time();
 
 if (!-x $ipraytime)
 {
-    &usage(1, "$ID ERROR - can't find '$ipraytime' \n");
+    &usage(1, "can't find '$ipraytime'");
 }
 
 # Continuously cycle through
@@ -189,9 +194,9 @@ for (;;)
 	    $sec_sleep	= ( $sec_diff - $time_used{sec} );
 
 	    # Tell user what to expect next
-	    $str	= "$ID NOTE - Next event '$EVENTS[$i]' is at ";
+	    $str	 = "$ID NOTE - Next event '$EVENTS[$i]' is at ";
 	    $str	.= "$today_events{$EVENTS[$i]}";
-	    &display($str);
+	    &display(0, $EVENTS[$i], $str);
 
 	    # Sort numerically descending
 	    foreach $reminder (sort {$b <=> $a} @reminders)
@@ -221,6 +226,9 @@ for (;;)
 
 	    &do_alarm($EVENTS[$i], \%today_events);
 
+	    # Take a nap and wait before next event/reminder
+	    sleep(300);
+
 	    # Establish new time for next prayer
 	    # - This is opted for instead of accounting for passed sec's
 	    $ref_time_used	= &get_time(time());
@@ -241,20 +249,46 @@ for (;;)
 # Print on screen passed-in string
 sub display
 {
-    my ($string)	= @_;
+    my ($salat_now,
+	$salat_name,
+	$string)	= @_;
 
-    # Do some clean-up and backtrack per use command-line directives
-    if ($opt{inplace})
+    # See if user is opting to use his/her own external trigger
+    if (defined $opt{execr} || ($salat_now && defined $opt{execs}))
     {
-	print "\r";
-	print " " x 78;
-	print "\r";
+	# Escape various characters just in case external application cares
+	$string		=~ s/\'/\\\'/g;
+	$string		=~ s/\(/\\\(/g;
+	$string		=~ s/\)/\\\)/g;
+
+	# Kill a previous application in case its still running
+	# - session/group PIDs (note '-')
+	if ( $cpid ) { kill "KILL", -$cpid; }
+
+	$ext_trigger	=  ( $salat_now ? $opt{execs} : $opt{execr} );
+
+	# Do various user substitutions
+	# - %m for normal printable message string
+	# - %s for salat name string
+	$ext_trigger	=~ s/\%m/$string/g;
+	$ext_trigger	=~ s/\%s/$salat_name/g;
+	$cpid		= &fork_exec("$ext_trigger");
     }
-    print $string;
-
-    if (!$opt{inplace})
+    else
     {
-	print "\n";
+	# Do some clean-up and backtrack per use command-line directives
+	if ($opt{inplace})
+	{
+	    print "\r";
+	    print " " x 78;
+	    print "\r";
+	}
+	print $string;
+
+	if (!$opt{inplace})
+	{
+	    print "\n";
+	}
     }
 }
 
@@ -432,12 +466,12 @@ sub do_reminder
 	}
 
 	&play_sound();
-	&display("$ID REMINDER - $str in $in_rem minutes !!");
+	&display(0, $in_name, "$ID REMINDER - $str in $in_rem minutes !!");
     }
 }
 
 ##
-# Trigger an alarm
+# Trigger the alarm
 sub do_alarm
 {
     my ($in_name,
@@ -470,7 +504,7 @@ sub do_alarm
 	$str		= "for Salat Al-$name";
     }
 
-    &display("$ID $event_struct{$in_name} - Time NOW $str !!");
+    &display(1, $in_name, "$ID $event_struct{$in_name} - Time NOW $str !!");
 
     for(my $i = 0; $i < $num_rings; $i++)
     {
@@ -487,18 +521,62 @@ sub play_sound
 }
 
 ##
+# Use this function instead of "system" (to catch Interrupts/^C and/or kills)
+sub fork_exec
+{
+    my ($command) = @_;
+
+  FORK_IT:
+    {
+	if ( $child_pid = fork )          # parent here
+	{
+	    return($child_pid);
+	}
+	elsif ( defined $child_pid )      # child here (PID --> 0)
+	{
+	    &POSIX::setsid();             # set current PID (child) to be session/group leader
+	    exec "$command" or &err(1, "Can't exec '$command': $!");
+	}
+	elsif ( $! =~ /no more/i )        # No more Processes (sleep & retry ?)
+	{
+#	    sleep 5; redo FORK_IT;
+	    &err(1, "No more processes !!!");
+	}
+	else                              # weird fork error
+	{
+	    &err(1, "Can't fork: $!");
+	}
+    }
+}
+
+##
+# Dump out an error message and possibly quit
+sub err
+{
+    my ($die_after,
+	$msg)		= @_;
+
+    print "$ID ERROR: $msg\n";
+
+    if ( $die_after ) { exit(1); }
+}
+
+##
 # Print short usage info
 sub usage
 {
     my ($die_after,
 	$err_msg)	= @_;
 
-    if (defined $err_msg) { print $err_msg; }
+#    if (defined $err_msg) { print $err_msg; }
+    if (defined $err_msg) { &err(0, $err_msg); }
     print qq
 |Usage: $in_script [-ipraytime path]
        $in_spaces [-skip event_name]
        $in_spaces [-reminder minutes]
        $in_spaces [-inplace]
+       $in_spaces [-execr cmd]
+       $in_spaces [-execs cmd]
        $in_spaces [-help]
 |;
     if ( $die_after ) { exit(5); }
@@ -519,6 +597,8 @@ sub help
     [-skip event_name]  : Specify name of prayer/event to skip (list ok)
     [-reminder minutes] : Specify prior to how many minutes to remind (list ok)
     [-inplace]          : Specify to print output in-place (without scrolling)
+    [-execr cmd]        : Specify an external application trigger for reminders
+    [-execs cmd]        : Specify an external application trigger for salat NOW
     [-help]             : Produce this help screen
 
 |;
@@ -535,6 +615,8 @@ sub get_args
 		"skip=s@",	# array'ed list of skip events
 		"reminder=s@",	# array'ed list of reminder times (minutes)
 		"inplace",	# specify to print in-place outputs (no scroll)
+		"execr=s",	# specify an external trigger (for reminders)
+		"execs=s",	# specify an external trigger (for salat_now)
 		"help",		# print a brief help screen
-		) || ( $? = 257, &usage(1, "$ID ERROR - Invalid argument\n") );
+		) || ( $? = 257, &usage(1, "Invalid argument !!") );
 }

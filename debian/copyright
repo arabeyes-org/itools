@@ -7,7 +7,7 @@ It was downloaded from http://www.arabeyes.org/project.php?proj=ITL
 
 Upstream Author:
 
-Copyright (c) 2003-2004, Arabeyes, The ITL project developers (see AUTHORS file)
+Copyright (c) 2003-2009, Arabeyes, The ITL project developers (see AUTHORS file)
 
 
 License:
@@ -26,5 +26,5 @@ A copy of the GNU General Public License is available at
 `/usr/share/common-licenses/GPL' in the Debian GNU/Linux distribution
 or on the World Wide Web at
 `http://www.gnu.org/copyleft/gpl.html'. You can also obtain it by
-writing to the Free Software Foundation, Inc., 59 Temple Place - Suite
-330, Boston, MA 02111-1307, USA.
+writing to the Free Software Foundation, Inc., 51 Franklin St, Fifth
+Floor, Boston, MA 02110-1301, USA.

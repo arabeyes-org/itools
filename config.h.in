@@ -1,4 +1,4 @@
-/* $Id: config.h.in,v 1.1 2004/07/17 01:26:54 nadim Exp $ */
+/* $Id: config.h.in 1518 2004-07-17 01:26:54Z nadim $ */
 
 /* Define to 1 if `tm_gmtoff' is member of `struct tm'. */
 #undef HAVE_TM_GMTOFF

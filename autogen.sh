@@ -1,20 +1,28 @@
 #!/bin/sh
 #--
-# $Id: autogen.sh,v 1.1 2004/07/17 01:26:54 nadim Exp $
+# $Id: autogen.sh 1936 2006-10-05 19:33:43Z thamer $
 #--
 
-EXIT=no
-
+# Handle arguments
 if test "$1" = "clean"; then
     echo "Removing auto-generated files..."
     rm -rf configure config.log config.status \
            Makefile config.h
-    EXIT="yes"
+    exit
 fi
+
+# Check for missing tools
+EXIT=no
+
+(autoconf --version) < /dev/null > /dev/null 2>&1 || {
+  echo "Error: You must have \`autoconf' installed."
+  EXIT="yes"
+}
 
 if test "$EXIT" = "yes"; then
     exit
 fi
+
 
 echo "Running autoconf..."
 autoconf configure.in > configure && chmod +x configure

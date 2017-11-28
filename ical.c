@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: ical.c,v 1.5 2004/07/16 00:39:56 nadim Exp $
+ * $Id: ical.c 2181 2009-03-09 04:17:36Z thamer $
  *
  * ------------
  * Description:
@@ -13,10 +13,10 @@
  * -----------------
  * Revision Details:    (Updated by Revision Control System)
  * -----------------
- *  $Date: 2004/07/16 00:39:56 $
- *  $Author: nadim $
- *  $Revision: 1.5 $
- *  $Source: /home/arabeyes/cvs/projects/itl/programs/itools/ical.c,v $
+ *  $Date: 2009-03-09 07:17:36 +0300 (Mon, 09 Mar 2009) $
+ *  $Author: thamer $
+ *  $Revision: 2181 $
+ *  $Source$
  *
  * (www.arabeyes.org - under GPL license)
  ************************************************************************/
@@ -24,7 +24,9 @@
 /* TODO:
  */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>             /* for strlen/strcat/etc */
 
 /* For time_t */
 #ifdef TM_IN_SYS_TIME
