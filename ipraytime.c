@@ -39,9 +39,11 @@
 #endif
 
 #include <itl/prayer.h>
+#include <sys/stat.h>
 
-#define PROG_NAME       "ipraytime";
-#define PROG_RCFILE     ".iprayrc";
+
+#define PROG_NAME       "ipraytime"
+#define PROG_RCFILE     "iprayrc"
 
 typedef struct
 {
@@ -274,19 +276,26 @@ process_file(sPref *pref_data,
    return(0);
 }
 
-/**
-   Get user's home-dir and RC-file with complete path
-**/
-char *
-get_rcfilename()
+char *get_filename(const char *directory, const char *name)
 {
+    char *path;
+    size_t dirlen;
 
-   char *rcname         = NULL;
+    dirlen = strlen(directory);
+    path = malloc((dirlen + strlen(name) + 2) * sizeof(char));
+    strcpy(path, directory);
+    if (dirlen == 0 || path[dirlen - 1] != '/')
+    {
+        path[dirlen++] = '/';
+    }
+    strcpy(path + dirlen, name);
+
+    return path;
+}
+
+char *get_homedir(void)
+{
    char *home           = NULL;
-   char *filepath       = NULL;
-
-   /* Let's see if getting user's homedir will be easy */
-   rcname       = PROG_RCFILE;
    home         = getenv("HOME");
 
    if (!home || !*home)
@@ -314,6 +323,46 @@ get_rcfilename()
          home = p->pw_dir;
       }
    }
+   home = strdup(home);
+   return(home);
+}
+
+char *expand_tilde(const char *filename)
+{
+    char *new_filename;
+    size_t homedirlen;
+
+    if (filename[0] == '~')
+    {
+        new_filename = get_homedir();
+        homedirlen = strlen(new_filename);
+        new_filename = realloc(new_filename,
+                (homedirlen + strlen(filename)) * sizeof(char));
+        strcpy(new_filename + homedirlen, filename + 1);
+        return new_filename;
+    }
+    else
+    {
+        return strdup(filename);
+    }
+}
+
+/**
+   Get user's home-dir and RC-file with complete path
+**/
+char *
+get_rcfilename()
+{
+
+   char *rcname         = NULL;
+   char *home           = NULL;
+   char *filepath       = NULL;
+
+   /* Let's see if getting user's homedir will be easy */
+   rcname       = malloc((strlen(PROG_RCFILE)+1)*sizeof(char));
+   rcname[0]    = '.';
+   strcat(rcname+1, PROG_RCFILE);
+   home         = get_homedir();
 
    /* Allocate memory to be safe not to trample on anything */
    filepath = (char *) malloc(strlen(home) + strlen(rcname) + 2);
@@ -325,6 +374,32 @@ get_rcfilename()
    if (!*home || home[strlen(home)-1] != '/')
       strcat(filepath, "/");
    strcat(filepath, rcname);
+
+   struct stat buf;
+   char *xdg_home;
+   char *newpath;
+
+   //does not exist, thus check XDG_CONFIG_HOME/PACKAGE_NAME/config
+   if (stat(filepath, &buf) != 0) {
+       xdg_home = getenv("XDG_CONFIG_HOME");
+       if (xdg_home) {
+           xdg_home = strdup(xdg_home);
+       } else {
+           xdg_home = expand_tilde("~/.config");
+       }
+       newpath = get_filename(xdg_home, PACKAGE_NAME);
+       free(xdg_home);
+       xdg_home = get_filename(newpath, PROG_RCFILE);
+       free(newpath);
+       newpath = xdg_home;
+       //If this does not exist fallback
+       if (stat(newpath, &buf) == 0) {
+           free(filepath);
+           filepath = newpath;
+       } else {
+           free(newpath);
+       }
+   }
 
    return(filepath);
 }
