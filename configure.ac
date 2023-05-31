@@ -13,9 +13,9 @@ AC_PROG_CC
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
-PKG_CHECK_MODULES(ITL, libitl >= 0.8.1,[], [
-  AC_CHECK_LIB([itl], [getNorthQibla], [], [AC_MSG_ERROR([ITL library required])])
-  ])
+PKG_CHECK_MODULES(ITL, libitl >= 0.8.1, [], 
+  AC_CHECK_LIB([itl], [getNorthQibla], [], AC_MSG_ERROR([ITL library required]))
+  )
 AC_CHECK_LIB([m], [pow])
 
 # Checks for header files.
