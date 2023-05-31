@@ -17,6 +17,19 @@
  *
  ************************************************************************/
 
+* Changes in itools-1.1
+
+** New Features
+*** Add new prayertime calc method names
+*** Read config file from ~/.iprayrc or <XDG_CONFIG_DIR>/itools/iprayrc
+
+** Bug fixes
+*** Fix spelling mistake in manpage
+*** Fix string format security
+
+** Build process
+*** Replace old configure scripts with autoconf scripts
+
 * Changes in itools-1.0
 
 ** New Features
