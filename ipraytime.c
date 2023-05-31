@@ -977,7 +977,7 @@ int main(int argc, char *argv[])
    /* Fill the city name */
    if (user_input.city && !is_user_cmdline)
    {
-      sprintf(city_name, user_input.city);
+      sprintf(city_name, "%s", user_input.city);
       free(user_input.city);
    }
    else
