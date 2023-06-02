@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([itools], [1.0], [https://github.com/arabeyes-org/ITL-programs/issues/new])
+AC_INIT([itools], [1.0], [https://github.com/arabeyes-org/itools/issues/new])
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([ipraytime.c])
 AC_CONFIG_HEADERS([config.h])
