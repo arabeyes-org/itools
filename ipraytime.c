@@ -359,7 +359,7 @@ get_rcfilename()
    char *filepath       = NULL;
 
    /* Let's see if getting user's homedir will be easy */
-   rcname       = malloc((strlen(PROG_RCFILE)+1)*sizeof(char));
+   rcname       = malloc((strlen(PROG_RCFILE)+2)*sizeof(char));
    rcname[0]    = '.';
    strcat(rcname+1, PROG_RCFILE);
    home         = get_homedir();
