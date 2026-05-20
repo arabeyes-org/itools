@@ -1,3 +1,4 @@
+AM_CFLAGS = -DPACKAGE_NAME=\"$(PACKAGE_NAME)\"
 bin_PROGRAMS	= ical idate ipraytime
 ical_LDADD= -litl -lm
 ical_SOURCES = ical.c
